@@ -1,0 +1,27 @@
+name: collect-github-metrics
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # once daily at 03:00 UTC
+  workflow_dispatch: {}    # allows manual trigger from the Actions tab, for testing
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install pg
+
+      - name: Run collector
+        env:
+          GH_TOKEN: ${{ secrets.METRICS_GH_TOKEN }}
+          GH_USER: mustakimhussain
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PG_CA_CERT: ${{ secrets.PG_CA_CERT }}
+        run: node scripts/collect-metrics.js
